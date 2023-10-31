@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"go-zero-bookstore/common/sdk/db/mdb/mysqlx"
 
 	"go-zero-bookstore/app/bookstore/cmd/rpc/internal/svc"
 	"go-zero-bookstore/app/bookstore/cmd/rpc/pb"
@@ -23,7 +22,7 @@ func NewGetBookLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetBookLo
 
 // 获取book
 func (l *GetBookLogic) GetBook(in *pb.GetBookReq) (*pb.GetBookResp, error) {
-	exist, err := l.svcCtx.Repo.ExistBookByID(l.ctx, mysqlx.Sess, in.Id)
+	exist, err := l.svcCtx.Repo.ExistBookByID(l.ctx, in.Id)
 	if err != nil {
 		logx.Error(err)
 		return nil, err
@@ -31,7 +30,7 @@ func (l *GetBookLogic) GetBook(in *pb.GetBookReq) (*pb.GetBookResp, error) {
 	if !exist {
 		return nil, ErrBookNotExist
 	}
-	book, err := l.svcCtx.Repo.GetBook(l.ctx, mysqlx.Sess, in.Id)
+	book, err := l.svcCtx.Repo.GetBook(l.ctx, in.Id)
 	if err != nil {
 		logx.Error(err)
 		return nil, ErrInternalFault

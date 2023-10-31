@@ -22,10 +22,10 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
+	logx.MustSetup(logx.LogConf{Encoding: "plain"})
+
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
-
-	logx.MustSetup(logx.LogConf{Encoding: "plain"})
 
 	// 注册一个全局错误拦截器, 用于处理未知错误
 	middleware.RecoverMiddlewareHandler = middleware.NewRecoverMiddleware()

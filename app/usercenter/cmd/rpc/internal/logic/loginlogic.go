@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"go-zero-bookstore/common/sdk/db/mdb/mysqlx"
 
 	"go-zero-bookstore/app/usercenter/cmd/rpc/internal/svc"
 	"go-zero-bookstore/app/usercenter/cmd/rpc/usercenter"
@@ -32,7 +31,7 @@ func (l *LoginLogic) Login(in *usercenter.LoginReq) (*usercenter.LoginResp, erro
 		return nil, ErrPasswordIncorrect
 	}
 
-	account, err := l.svcCtx.Repo.GetAccountByMobile(l.ctx, mysqlx.Sess, in.Mobile)
+	account, err := l.svcCtx.Repo.GetAccountByMobile(l.ctx, in.Mobile)
 	if err != nil {
 		return nil, ErrAccountInternalFault
 	}

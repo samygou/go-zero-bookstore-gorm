@@ -1,8 +1,11 @@
 package result
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -106,7 +109,28 @@ func (fr *FileResponse) GetErr() *errorx.Status {
 	return fr.err
 }
 
-func (fr *FileResponse) Set(c *Context) {}
+func (fr *FileResponse) GetHttpCode() int {
+	return fr.HttpStatus
+}
+
+func (fr *FileResponse) Set(c *Context) {
+	if len(fr.Content) == 0 {
+		c.RW.WriteHeader(http.StatusNotFound)
+	} else {
+		c.RW.Header().Set("Content-Length", strconv.Itoa(len(fr.Content)))
+		c.RW.Header().Set("Content-Type", fr.ContentType)
+		c.RW.Header().Set("Content-Disposition", fr.ContentDisposition)
+
+		b := bytes.NewBuffer(fr.Content)
+
+		io.Copy(c.RW, b)
+		c.RW.WriteHeader(http.StatusOK)
+	}
+
+	if fr.HttpStatus != 0 {
+		c.RW.WriteHeader(fr.HttpStatus)
+	}
+}
 
 func toResponseErr(err error) *errorx.Status {
 	var out *errorx.Status

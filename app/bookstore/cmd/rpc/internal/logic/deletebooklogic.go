@@ -6,7 +6,6 @@ import (
 	"go-zero-bookstore/app/bookstore/cmd/rpc/internal/svc"
 	"go-zero-bookstore/app/bookstore/cmd/rpc/pb"
 	"go-zero-bookstore/common/logx"
-	"go-zero-bookstore/common/sdk/db/mdb/mysqlx"
 )
 
 type DeleteBookLogic struct {
@@ -23,7 +22,7 @@ func NewDeleteBookLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delete
 
 // 删除book
 func (l *DeleteBookLogic) DeleteBook(in *pb.DeleteBookReq) (*pb.DeleteBookResp, error) {
-	exist, err := l.svcCtx.Repo.ExistBookByID(l.ctx, mysqlx.Sess, in.Id)
+	exist, err := l.svcCtx.Repo.ExistBookByID(l.ctx, in.Id)
 	if err != nil {
 		logx.Error(err)
 		return nil, ErrInternalFault
@@ -32,7 +31,7 @@ func (l *DeleteBookLogic) DeleteBook(in *pb.DeleteBookReq) (*pb.DeleteBookResp, 
 		return nil, ErrBookNotExist
 	}
 
-	id, err := l.svcCtx.Repo.DeleteBook(l.ctx, mysqlx.Sess, in.Id)
+	id, err := l.svcCtx.Repo.DeleteBook(l.ctx, in.Id)
 	if err != nil {
 		logx.Error(err)
 		return nil, ErrInternalFault

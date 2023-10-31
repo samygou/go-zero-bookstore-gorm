@@ -11,21 +11,25 @@ import (
 )
 
 type (
-	accountRepo struct{}
+	accountRepo struct {
+		db *gorm.DB
+	}
 )
 
-func NewAccountRepo() interfaces.AccountRepo {
-	return &accountRepo{}
+func NewAccountRepo(db *gorm.DB) interfaces.AccountRepo {
+	return &accountRepo{
+		db: db,
+	}
 }
 
-func (repo *accountRepo) ExistAccountByMobile(ctx context.Context, sess *gorm.DB, mobile string) (bool, error) {
+func (repo *accountRepo) ExistAccountByMobile(ctx context.Context, mobile string) (bool, error) {
 	type account struct {
 		ID int64 `gorm:"id"`
 	}
 
 	var result account
 
-	err := sess.Model(&tables.Account{}).Where("mobile = ?", mobile).Find(&result).Error
+	err := repo.db.Model(&tables.Account{}).Where("mobile = ?", mobile).Find(&result).Error
 	if err != nil {
 		logx.Error(err)
 		return false, err
@@ -38,14 +42,14 @@ func (repo *accountRepo) ExistAccountByMobile(ctx context.Context, sess *gorm.DB
 	return false, nil
 }
 
-func (repo *accountRepo) ExistAccountByID(ctx context.Context, sess *gorm.DB, id int64) (bool, error) {
+func (repo *accountRepo) ExistAccountByID(ctx context.Context, id int64) (bool, error) {
 	type account struct {
 		ID int64 `gorm:"id"`
 	}
 
 	var result account
 
-	err := sess.Model(&tables.Account{}).Where("id = ?", id).Find(&result).Error
+	err := repo.db.Model(&tables.Account{}).Where("id = ?", id).Find(&result).Error
 	if err != nil {
 		logx.Error(err)
 		return false, err
@@ -58,10 +62,10 @@ func (repo *accountRepo) ExistAccountByID(ctx context.Context, sess *gorm.DB, id
 	return false, nil
 }
 
-func (repo *accountRepo) GetAccountByMobile(ctx context.Context, sess *gorm.DB, mobile string) (*interfaces.Account, error) {
+func (repo *accountRepo) GetAccountByMobile(ctx context.Context, mobile string) (*interfaces.Account, error) {
 	var account tables.Account
 
-	err := sess.Where("mobile = ?", mobile).Find(&account).Error
+	err := repo.db.Where("mobile = ?", mobile).Find(&account).Error
 	if err != nil {
 		logx.Error(err)
 		return nil, err
@@ -79,7 +83,7 @@ func (repo *accountRepo) GetAccountByMobile(ctx context.Context, sess *gorm.DB, 
 	}, nil
 }
 
-func (repo *accountRepo) CreateAccount(ctx context.Context, sess *gorm.DB, req *interfaces.CreateAccountReq) (int64, error) {
+func (repo *accountRepo) CreateAccount(ctx context.Context, req *interfaces.CreateAccountReq) (int64, error) {
 	account := tables.Account{
 		DelStatus: 0,
 		Mobile:    req.Mobile,
@@ -89,7 +93,7 @@ func (repo *accountRepo) CreateAccount(ctx context.Context, sess *gorm.DB, req *
 		Avatar:    req.Avatar,
 		Remark:    req.Remark,
 	}
-	err := sess.Create(&account).Error
+	err := repo.db.Create(&account).Error
 	if err != nil {
 		logx.Error(err)
 		return 0, err
@@ -98,8 +102,8 @@ func (repo *accountRepo) CreateAccount(ctx context.Context, sess *gorm.DB, req *
 	return account.ID, nil
 }
 
-func (repo *accountRepo) UpdateAccount(ctx context.Context, sess *gorm.DB, req *interfaces.UpdateAccountReq) (int64, error) {
-	err := sess.Model(&tables.Account{}).Where("id = ?", req.ID).Updates(map[string]interface{}{
+func (repo *accountRepo) UpdateAccount(ctx context.Context, req *interfaces.UpdateAccountReq) (int64, error) {
+	err := repo.db.Model(&tables.Account{}).Where("id = ?", req.ID).Updates(map[string]interface{}{
 		"mobile":   req.Mobile,
 		"username": req.Username,
 		"sex":      req.Sex,
@@ -114,10 +118,10 @@ func (repo *accountRepo) UpdateAccount(ctx context.Context, sess *gorm.DB, req *
 	return req.ID, nil
 }
 
-func (repo *accountRepo) GetAccountInfo(ctx context.Context, sess *gorm.DB, id int64) (*interfaces.Account, error) {
+func (repo *accountRepo) GetAccountInfo(ctx context.Context, id int64) (*interfaces.Account, error) {
 	var account tables.Account
 
-	err := sess.Where("id = ?", id).Find(&account).Error
+	err := repo.db.Where("id = ?", id).Find(&account).Error
 	if err != nil {
 		logx.Error(err)
 		return nil, err

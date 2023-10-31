@@ -2,11 +2,11 @@ package logic
 
 import (
 	"context"
+
 	"go-zero-bookstore/app/usercenter/cmd/rpc/internal/interfaces"
 	"go-zero-bookstore/app/usercenter/cmd/rpc/internal/svc"
 	"go-zero-bookstore/app/usercenter/cmd/rpc/usercenter"
 	"go-zero-bookstore/common/logx"
-	"go-zero-bookstore/common/sdk/db/mdb/mysqlx"
 	tool "go-zero-bookstore/common/tools"
 )
 
@@ -35,7 +35,7 @@ func (l *RegisterLogic) Register(in *usercenter.RegisterReq) (*usercenter.Regist
 		return nil, ErrPasswordUnEqual
 	}
 
-	exist, err := l.svcCtx.Repo.ExistAccountByMobile(l.ctx, mysqlx.Sess, in.Mobile)
+	exist, err := l.svcCtx.Repo.ExistAccountByMobile(l.ctx, in.Mobile)
 	if err != nil {
 		return nil, ErrAccountInternalFault
 	}
@@ -43,7 +43,7 @@ func (l *RegisterLogic) Register(in *usercenter.RegisterReq) (*usercenter.Regist
 		return nil, ErrAccountAlreadyExists
 	}
 
-	accountId, err := l.svcCtx.Repo.CreateAccount(l.ctx, mysqlx.Sess, &interfaces.CreateAccountReq{
+	accountId, err := l.svcCtx.Repo.CreateAccount(l.ctx, &interfaces.CreateAccountReq{
 		Mobile:   in.Mobile,
 		Username: in.Username,
 		Password: tool.Md5ByString(in.Password),

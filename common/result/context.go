@@ -30,6 +30,7 @@ type Context struct {
 	RequestId string
 	StartTime int64
 	HTTPCtx   context.Context
+	RW        http.ResponseWriter
 	Resp      Response
 }
 
@@ -49,7 +50,7 @@ func (c *Context) SetResponse(resp Response) {
 	c.Resp.Set(c)
 }
 
-func (c *Context) ResponseJson(w http.ResponseWriter, resp ...Response) {
+func (c *Context) ResponseJson(resp ...Response) {
 	if len(resp) > 0 {
 		resp[0].Set(c)
 		c.Resp = resp[0]
@@ -60,7 +61,7 @@ func (c *Context) ResponseJson(w http.ResponseWriter, resp ...Response) {
 		httpCode = c.Resp.GetHttpCode()
 	}
 
-	if err := c.doWriteJson(w, httpCode); err != nil {
+	if err := c.doWriteJson(c.RW, httpCode); err != nil {
 		logx.Error(err)
 	}
 }
@@ -70,6 +71,34 @@ func (c *Context) doWriteJson(w http.ResponseWriter, code int) error {
 	w.WriteHeader(code)
 
 	if n, err := w.Write(c.Resp.GetContent()); err != nil {
+		// http.ErrHandlerTimeout has been handled by http.TimeoutHandler,
+		// so it's ignored here.
+		if !errors.Is(err, http.ErrHandlerTimeout) {
+			return fmt.Errorf("write response failed, error: %w", err)
+		}
+	} else if n < len(c.Resp.GetContent()) {
+		return fmt.Errorf("actual bytes: %d, written bytes: %d", len(c.Resp.GetContent()), n)
+	}
+
+	return nil
+}
+
+func (c *Context) ResponseFile(file []byte, typ, disposition string) {
+	fr := FileResponse{
+		Content:            file,
+		ContentType:        typ,
+		ContentDisposition: disposition,
+	}
+	fr.Set(c)
+	c.Resp = &fr
+
+	if err := c.doWriteFile(); err != nil {
+		logx.Error(err)
+	}
+}
+
+func (c *Context) doWriteFile() error {
+	if n, err := c.RW.Write(c.Resp.GetContent()); err != nil {
 		// http.ErrHandlerTimeout has been handled by http.TimeoutHandler,
 		// so it's ignored here.
 		if !errors.Is(err, http.ErrHandlerTimeout) {

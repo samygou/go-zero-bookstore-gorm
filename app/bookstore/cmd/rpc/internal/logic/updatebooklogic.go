@@ -7,7 +7,6 @@ import (
 	"go-zero-bookstore/app/bookstore/cmd/rpc/internal/svc"
 	"go-zero-bookstore/app/bookstore/cmd/rpc/pb"
 	"go-zero-bookstore/common/logx"
-	"go-zero-bookstore/common/sdk/db/mdb/mysqlx"
 )
 
 type UpdateBookLogic struct {
@@ -32,7 +31,7 @@ func (l *UpdateBookLogic) UpdateBook(in *pb.UpdateBookReq) (*pb.UpdateBookResp, 
 		return nil, ErrBookPriceIsIncorrect
 	}
 
-	exist, err := l.svcCtx.Repo.ExistBookByID(l.ctx, mysqlx.Sess, in.Id)
+	exist, err := l.svcCtx.Repo.ExistBookByID(l.ctx, in.Id)
 	if err != nil {
 		return nil, ErrInternalFault
 	}
@@ -40,7 +39,7 @@ func (l *UpdateBookLogic) UpdateBook(in *pb.UpdateBookReq) (*pb.UpdateBookResp, 
 		return nil, ErrBookNotExist
 	}
 
-	id, err := l.svcCtx.Repo.UpdateBook(l.ctx, mysqlx.Sess, &interfaces.UpdateBookReq{
+	id, err := l.svcCtx.Repo.UpdateBook(l.ctx, &interfaces.UpdateBookReq{
 		ID:    in.Id,
 		Name:  in.Name,
 		Price: in.Price,

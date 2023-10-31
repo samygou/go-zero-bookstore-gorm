@@ -11,20 +11,23 @@ import (
 )
 
 type bookRepo struct {
+	db *gorm.DB
 }
 
-func NewBookRepo() interfaces.BookRepo {
-	return &bookRepo{}
+func NewBookRepo(db *gorm.DB) interfaces.BookRepo {
+	return &bookRepo{
+		db: db,
+	}
 }
 
-func (repo *bookRepo) ExistBookByID(ctx context.Context, sess *gorm.DB, id int64) (bool, error) {
+func (repo *bookRepo) ExistBookByID(ctx context.Context, id int64) (bool, error) {
 	type book struct {
 		ID int64 `gorm:"id"`
 	}
 
 	var record book
 
-	err := sess.Model(&tables.Book{}).Select("id").Where("id = ?", id).Find(&record).Error
+	err := repo.db.Model(&tables.Book{}).Select("id").Where("id = ?", id).Find(&record).Error
 	if err != nil {
 		return false, err
 	}
@@ -36,13 +39,13 @@ func (repo *bookRepo) ExistBookByID(ctx context.Context, sess *gorm.DB, id int64
 	return false, nil
 }
 
-func (repo *bookRepo) CreateBook(ctx context.Context, sess *gorm.DB, req *interfaces.CreateBookReq) (int64, error) {
+func (repo *bookRepo) CreateBook(ctx context.Context, req *interfaces.CreateBookReq) (int64, error) {
 	book := tables.Book{
 		Name:  req.Name,
 		Price: req.Price,
 		Desc:  req.Desc,
 	}
-	err := sess.Create(&book).Error
+	err := repo.db.Create(&book).Error
 	if err != nil {
 		logx.Error(err)
 		return 0, err
@@ -51,8 +54,8 @@ func (repo *bookRepo) CreateBook(ctx context.Context, sess *gorm.DB, req *interf
 	return book.ID, nil
 }
 
-func (repo *bookRepo) UpdateBook(ctx context.Context, sess *gorm.DB, req *interfaces.UpdateBookReq) (int64, error) {
-	err := sess.Model(&tables.Book{}).Where("id = ?", req.ID).Updates(map[string]interface{}{
+func (repo *bookRepo) UpdateBook(ctx context.Context, req *interfaces.UpdateBookReq) (int64, error) {
+	err := repo.db.Model(&tables.Book{}).Where("id = ?", req.ID).Updates(map[string]interface{}{
 		"name":  req.Name,
 		"price": req.Price,
 		"desc":  req.Desc,
@@ -65,8 +68,8 @@ func (repo *bookRepo) UpdateBook(ctx context.Context, sess *gorm.DB, req *interf
 	return req.ID, nil
 }
 
-func (repo *bookRepo) DeleteBook(ctx context.Context, sess *gorm.DB, id int64) (int64, error) {
-	err := sess.Where("id = ?", id).Delete(&tables.Book{}).Error
+func (repo *bookRepo) DeleteBook(ctx context.Context, id int64) (int64, error) {
+	err := repo.db.Where("id = ?", id).Delete(&tables.Book{}).Error
 	if err != nil {
 		logx.Error(err)
 		return 0, err
@@ -74,10 +77,10 @@ func (repo *bookRepo) DeleteBook(ctx context.Context, sess *gorm.DB, id int64) (
 	return id, nil
 }
 
-func (repo *bookRepo) GetBook(ctx context.Context, sess *gorm.DB, id int64) (*interfaces.Book, error) {
+func (repo *bookRepo) GetBook(ctx context.Context, id int64) (*interfaces.Book, error) {
 	var book tables.Book
 
-	err := sess.Where("id = ?", id).Find(&book).Error
+	err := repo.db.Where("id = ?", id).Find(&book).Error
 	if err != nil {
 		logx.Error(err)
 		return nil, err
@@ -93,10 +96,10 @@ func (repo *bookRepo) GetBook(ctx context.Context, sess *gorm.DB, id int64) (*in
 	}, nil
 }
 
-func (repo *bookRepo) GetBooks(ctx context.Context, sess *gorm.DB, req *interfaces.GetBooksReq) ([]interfaces.Book, error) {
+func (repo *bookRepo) GetBooks(ctx context.Context, req *interfaces.GetBooksReq) ([]interfaces.Book, error) {
 	var books []tables.Book
 
-	session := sess.Model(&tables.Book{})
+	session := repo.db.Model(&tables.Book{})
 	if req.Name != nil {
 		session = session.Where("name = ?", *req.Name)
 	}

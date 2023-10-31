@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"go-zero-bookstore/common/sdk/db/mdb/mysqlx"
 
 	"go-zero-bookstore/app/usercenter/cmd/rpc/internal/svc"
 	"go-zero-bookstore/app/usercenter/cmd/rpc/usercenter"
@@ -21,7 +20,7 @@ func NewGetUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 }
 
 func (l *GetUserInfoLogic) GetUserInfo(in *usercenter.GetUserInfoReq) (*usercenter.GetUserInfoResp, error) {
-	account, err := l.svcCtx.Repo.GetAccountInfo(l.ctx, mysqlx.Sess, in.Id)
+	account, err := l.svcCtx.Repo.GetAccountInfo(l.ctx, in.Id)
 	if err != nil {
 		return nil, ErrAccountInternalFault
 	}

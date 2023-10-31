@@ -12,23 +12,24 @@ import (
 )
 
 type RecoverMiddleware struct {
-	RequestCtx *result.Context
+	HTTPCtx *result.Context
 }
 
 var RecoverMiddlewareHandler *RecoverMiddleware
 
 func NewRecoverMiddleware() *RecoverMiddleware {
 	return &RecoverMiddleware{
-		RequestCtx: result.NewContext(),
+		HTTPCtx: result.NewContext(),
 	}
 }
 
 // Handle returns a middleware that recovers if panic happens.
 func (m *RecoverMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		m.RequestCtx.RequestId = xid.New().String()
-		m.RequestCtx.StartTime = time.Now().UnixNano() / 1000000
-		m.RequestCtx.HTTPCtx = r.Context()
+		m.HTTPCtx.RequestId = xid.New().String()
+		m.HTTPCtx.StartTime = time.Now().UnixNano() / 1000000
+		m.HTTPCtx.HTTPCtx = r.Context()
+		m.HTTPCtx.RW = w
 
 		defer func() {
 			if err := recover(); err != nil {
@@ -37,7 +38,7 @@ func (m *RecoverMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 					logx.Error(err)
 				default:
 					logx.Error(err)
-					m.RequestCtx.ResponseJson(w, &result.JsonResponse{Err: errorx.NewError(errorx.CodeUnknown, "unknown err")})
+					m.HTTPCtx.ResponseJson(&result.JsonResponse{Err: errorx.NewError(errorx.CodeUnknown, "unknown err")})
 				}
 			}
 		}()

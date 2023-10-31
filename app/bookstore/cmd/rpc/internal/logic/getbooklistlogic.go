@@ -2,9 +2,8 @@ package logic
 
 import (
 	"context"
-	"go-zero-bookstore/app/bookstore/cmd/rpc/internal/interfaces"
-	"go-zero-bookstore/common/sdk/db/mdb/mysqlx"
 
+	"go-zero-bookstore/app/bookstore/cmd/rpc/internal/interfaces"
 	"go-zero-bookstore/app/bookstore/cmd/rpc/internal/svc"
 	"go-zero-bookstore/app/bookstore/cmd/rpc/pb"
 	"go-zero-bookstore/common/logx"
@@ -34,7 +33,7 @@ func (l *GetBookListLogic) GetBookList(in *pb.GetBookListReq) (*pb.GetBookListRe
 		pageSize = *in.PageSize
 	}
 
-	results, err := l.svcCtx.Repo.GetBooks(l.ctx, mysqlx.Sess, &interfaces.GetBooksReq{
+	results, err := l.svcCtx.Repo.GetBooks(l.ctx, &interfaces.GetBooksReq{
 		Name:     in.Name,
 		Price:    in.Price,
 		OrderBy:  in.OrderBy,

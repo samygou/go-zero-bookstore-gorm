@@ -16,16 +16,16 @@ func GetBookHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.GetBookReq
 		if err := httpx.Parse(r, &req); err != nil {
-			svcCtx.RecoverMiddlewareCtx.RequestCtx.ResponseJson(w, &result.JsonResponse{Err: errorx.NewError(errorx.CodeInvalidArgument, err.Error())})
+			svcCtx.RecoverMiddlewareCtx.HTTPCtx.ResponseJson(&result.JsonResponse{Err: errorx.NewError(errorx.CodeInvalidArgument, err.Error())})
 			return
 		}
 
 		l := bookstoreCenter.NewGetBookLogic(r.Context(), svcCtx)
 		resp, err := l.GetBook(&req)
 		if err != nil {
-			svcCtx.RecoverMiddlewareCtx.RequestCtx.ResponseJson(w, &result.JsonResponse{Err: err})
+			svcCtx.RecoverMiddlewareCtx.HTTPCtx.ResponseJson(&result.JsonResponse{Err: err})
 		} else {
-			svcCtx.RecoverMiddlewareCtx.RequestCtx.ResponseJson(w, &result.JsonResponse{Value: result.M{
+			svcCtx.RecoverMiddlewareCtx.HTTPCtx.ResponseJson(&result.JsonResponse{Value: result.M{
 				"data": resp,
 			}})
 		}

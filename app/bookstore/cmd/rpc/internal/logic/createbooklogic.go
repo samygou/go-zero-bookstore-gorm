@@ -2,11 +2,11 @@ package logic
 
 import (
 	"context"
+
 	"go-zero-bookstore/app/bookstore/cmd/rpc/internal/interfaces"
 	"go-zero-bookstore/app/bookstore/cmd/rpc/internal/svc"
 	"go-zero-bookstore/app/bookstore/cmd/rpc/pb"
 	"go-zero-bookstore/common/logx"
-	"go-zero-bookstore/common/sdk/db/mdb/mysqlx"
 )
 
 type CreateBookLogic struct {
@@ -31,7 +31,7 @@ func (l *CreateBookLogic) CreateBook(in *pb.CreateBookReq) (*pb.CreateBookResp, 
 		return nil, ErrBookPriceIsIncorrect
 	}
 
-	bookId, err := l.svcCtx.Repo.CreateBook(l.ctx, mysqlx.Sess, &interfaces.CreateBookReq{
+	bookId, err := l.svcCtx.Repo.CreateBook(l.ctx, &interfaces.CreateBookReq{
 		Name:  in.Name,
 		Price: in.Price,
 		Desc:  in.Desc,

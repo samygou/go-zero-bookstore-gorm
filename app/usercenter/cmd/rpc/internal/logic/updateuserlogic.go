@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"go-zero-bookstore/app/usercenter/cmd/rpc/internal/interfaces"
-	"go-zero-bookstore/common/sdk/db/mdb/mysqlx"
-
 	"go-zero-bookstore/app/usercenter/cmd/rpc/internal/svc"
 	"go-zero-bookstore/app/usercenter/cmd/rpc/usercenter"
 	"go-zero-bookstore/common/logx"
@@ -32,7 +30,7 @@ func (l *UpdateUserLogic) UpdateUser(in *usercenter.UpdateUserReq) (*usercenter.
 	//if errors.Is(err, repository.ErrNotFound) {
 	//	return nil, ErrAccountNotExists
 	//}
-	exist, err := l.svcCtx.Repo.ExistAccountByID(l.ctx, mysqlx.Sess, in.Id)
+	exist, err := l.svcCtx.Repo.ExistAccountByID(l.ctx, in.Id)
 	if err != nil {
 		return nil, ErrAccountInternalFault
 	}
@@ -42,7 +40,7 @@ func (l *UpdateUserLogic) UpdateUser(in *usercenter.UpdateUserReq) (*usercenter.
 	}
 
 	// 更新的时候更全全部字段, 创建时间和更新时间系统默认更新, 不能自主更新
-	_, err = l.svcCtx.Repo.UpdateAccount(l.ctx, mysqlx.Sess, &interfaces.UpdateAccountReq{
+	_, err = l.svcCtx.Repo.UpdateAccount(l.ctx, &interfaces.UpdateAccountReq{
 		ID:       in.Id,
 		Mobile:   in.Mobile,
 		Username: in.Username,
