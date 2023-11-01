@@ -53,5 +53,24 @@ func New(dataSource string, args map[string]interface{}) *gorm.DB {
 		}
 	}
 
+	// 加入数据库的定时探测
+	func() {
+		period := 30 * time.Second
+		timer := time.NewTimer(period)
+		go func() {
+			for {
+				select {
+				case <-timer.C:
+					if err = sqlDB.Ping(); err != nil {
+						logx.Warnf("db lose connect: %v", err)
+					} else {
+						logx.Info("db connected")
+					}
+					timer.Reset(period)
+				}
+			}
+		}()
+	}()
+
 	return db
 }
