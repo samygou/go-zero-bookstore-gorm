@@ -8,12 +8,13 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
 	"go-zero-bookstore/app/usercenter/cmd/rpc/internal/config"
 	"go-zero-bookstore/app/usercenter/cmd/rpc/internal/server"
 	"go-zero-bookstore/app/usercenter/cmd/rpc/internal/svc"
 	"go-zero-bookstore/app/usercenter/cmd/rpc/usercenter"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 var configFile = flag.String("f", "etc/usercenter.yaml", "the config file")

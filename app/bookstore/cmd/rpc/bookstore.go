@@ -3,16 +3,18 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
 	"go-zero-bookstore/app/bookstore/cmd/rpc/internal/config"
 	"go-zero-bookstore/app/bookstore/cmd/rpc/internal/server"
 	"go-zero-bookstore/app/bookstore/cmd/rpc/internal/svc"
 	"go-zero-bookstore/app/bookstore/cmd/rpc/pb"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 var configFile = flag.String("f", "etc/bookstore.yaml", "the config file")
